@@ -1,6 +1,8 @@
 <html>
 <?php
 
+require_once("SQLUtil.php"); 
+
 if(isset($_POST['update']))
 {
 	update();
@@ -10,39 +12,6 @@ else
 	display();
 }
 
-function runSQL($sql, $array, $update)
-{	
-	$result = [];
-
-	try 
-	{
-		if (is_null($conn))
-		{
-			$servername = "localhost";
-			$username = "root";
-			$password = "Red65pot!@#$";
-			$dbname = "employees";
-
-		    $conn = new PDO("mysql:host=$servername;dbname=$dbname", $username, $password);
-		    $conn->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);			
-		}
-
-		$stmt = $conn->prepare($sql);
-
-		$stmt->execute($array);
-
-		if (!$update)
-			$result = $stmt->fetchAll(PDO::FETCH_ASSOC);
-		else
-			$result = "true";
-	}
-	catch(PDOException $e)
-	{
-	    echo "Error: " . $e->getMessage();
-	}
-
-	return $result;
-}
 
 function update()
 {
@@ -66,13 +35,13 @@ function update()
 	    ':id' => $id,
 	);
 
-	if (!is_null(runSQL($sql, $array, true)))
+	if (!empty(SQLUtil::run($sql, $array, true)))
 	{
-		echo "Update Successful";
+		echo "\n - Update Successful";
 	}
 	else
 	{
-		echo "Update Failed";		
+		echo "\n - Update Failed";		
 	}
 
 	echo "<tr>
@@ -155,7 +124,7 @@ function display()
 		    ':id' => $_POST["id"]
 		);
 
-	    $result = runSQL($sql, $array, false);
+	    $result = SQLUtil::run($sql, $array, false);
 	    foreach(new TableRows(new RecursiveArrayIterator($result)) as $key=>$value) 
 	    {
 	    	echo $value;
